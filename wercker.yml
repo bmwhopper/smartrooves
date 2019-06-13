@@ -45,16 +45,13 @@ deploy:
         code: sed -i -e "s^repository^$OCIR_REPOSITORY^g" $WERCKER_ROOT/kubernetes_deployment.yml  
     - script:
         name: "Replace secret name"
-        code: sed -i -e "s^ocirsecretname^$OCIR_SECRET^g" $WERCKER_ROOT/kubernetes_deployment.yml
-    - script:
-        name: "Visualise Kubernetes config"
-        code: cat kubernetes_deployment.yml      
+        code: sed -i -e "^ocirsecretname^$OCIR_SECRET^" $WERCKER_ROOT/kubernetes_deployment.yml     
     - kubectl:
         name: deploy to oke
         server: $OKE_URL
         token: $OKE_TOKEN
         insecure-skip-tls-verify: true
-        command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml --namespace=default
+        command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml
 
     - kubectl:
         name: set deployment timeout
@@ -67,4 +64,4 @@ deploy:
         server: $OKE_URL
         token: $OKE_TOKEN
         insecure-skip-tls-verify: true
-        command: rollout status deployment/medrecapi
+        command: rollout status deployment/smartrooves
