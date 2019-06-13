@@ -1,35 +1,16 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: smartrooves
+  name: hello-world-deployment
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
-      labels:
-        app: hackathon
-        version: v1
-    spec:
-      containers:
-      - name: hackathon
-        image: registry/repository:v1
-        imagePullPolicy: Always
+      labels: # labels to select/identify the deployment
+        app: hello-world  
+    spec:     # pod spec                  
+      containers: 
+      - name: hello-world 
+        image:  # image we pushed in your contaieer registry
         ports:
-        - containerPort: 8080
-          protocol: TCP
-      imagePullSecrets:
-      - name: ocirsecretname  
-      restartPolicy: Always
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: hackathon
-  labels:
-    app: smartrooves
-spec:
-  ports:
-  - port: 8080
-    name: http
-  selector:
-    app: hackathon
+        - containerPort: 3000
