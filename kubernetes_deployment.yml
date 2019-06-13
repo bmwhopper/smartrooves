@@ -7,11 +7,11 @@ spec:
   template:
     metadata:
       labels:
-        app: hackathon
+        app: smartrooves
         version: v1
     spec:
       containers:
-      - name: hackathon
+      - name: smartrooves
         image: registry/repository:v1
         imagePullPolicy: Always
         ports:
@@ -24,7 +24,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hackathon
+  name: smartrooves
   labels:
     app: smartrooves
 spec:
@@ -32,4 +32,4 @@ spec:
   - port: 8080
     name: http
   selector:
-    app: hackathon
+    app: smartrooves
