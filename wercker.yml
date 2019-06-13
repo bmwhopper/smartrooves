@@ -9,6 +9,11 @@ build:
     - internal/watch:
         code: node app.js
         reload: true
+test:
+  steps:
+    - script:
+        name: Maven test
+        code: mvn test
 
 push:
   steps:
