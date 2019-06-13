@@ -7,7 +7,7 @@ build:
   steps:
     - npm-install
     - internal/watch:
-        code: node index.js
+        code: node login.js
         reload: true
 test:
   # The steps that will be executed on build
