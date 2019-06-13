@@ -26,7 +26,7 @@ test:
 
 push:
   steps:
-    - internal/docker-push:
+    - internal/push:
         username: $OCIR_USERNAME
         password: $OCIR_PASSWORD
         repository: $OCIR_REPOSITORY
@@ -35,8 +35,7 @@ push:
 
 deploy:
   box: 
-    id: alpine
-    cmd: /bin/sh
+    id: node:latest
   steps:
     - script:
         name: "Replace repository url"
