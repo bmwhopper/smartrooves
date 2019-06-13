@@ -1,9 +1,14 @@
-box: combient/java-mvn  
-test:
+box: 
+  id: node:latest
+  ports: 
+    - "8080"
+    
+dev:
   steps:
-    - script:
-        name: Maven test
-        code: mvn test
+    - npm-install
+    - internal/watch:
+        code: node app.js
+        reload: true
 build:
   steps:
     - script: 
