@@ -3,17 +3,12 @@ box:
   ports: 
     - "8080"
     
-dev:
+build:
   steps:
     - npm-install
     - internal/watch:
         code: node app.js
         reload: true
-build:
-  steps:
-    - script: 
-         name: Maven install
-         code: mvn install
 
 push:
   steps:
