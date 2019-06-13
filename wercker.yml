@@ -40,13 +40,12 @@ deploy:
     - script:
         name: "Replace repository url"
         code: sed -i -e "s^registry^$OCIR_REGISTRY^g" $WERCKER_ROOT/kubernetes_deployment.yml
-        echo: registry
     - script:
-        name: "Replace repo"
+        name: "Replace repository"
         code: sed -i -e "s^repository^$OCIR_REPOSITORY^g" $WERCKER_ROOT/kubernetes_deployment.yml  
     - script:
-        name: "Replace secret name"
-        code: sed -i -e "s/\ocirsecretname^/\$OCIR_SECRET/\g" $WERCKER_ROOT/kubernetes_deployment.yml 
+        name: "Replace password"
+        code: sed -i -e "s^ocirsecretname^$OCIR_PASSWORD^g" $WERCKER_ROOT/kubernetes_deployment.yml 
     - script:
         name: "Visualise Kubernetes config"
         code: cat kubernetes_deployment.yml
