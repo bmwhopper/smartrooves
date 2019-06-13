@@ -11,7 +11,7 @@ spec:
         version: v1
     spec:
       containers:
-      - name: smartrooves
+      - name: hackathon
         image: registry/repository:v1
         imagePullPolicy: Always
         ports:
