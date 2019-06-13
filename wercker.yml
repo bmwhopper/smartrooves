@@ -61,7 +61,6 @@ deploy:
         server: $OKE_URL
         token: $OKE_TOKEN
         insecure-skip-tls-verify: true
-
     - kubectl:
         name: check deployment status
         server: $OKE_URL
