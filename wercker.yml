@@ -53,7 +53,7 @@ deploy:
         name: deploy to oke
         server: $OKE_URL
         token: $OKE_TOKEN
-        insecure-skip-tls-verify: true
+        #insecure-skip-tls-verify: true
         command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml --namespace=default
 
     - kubectl:
