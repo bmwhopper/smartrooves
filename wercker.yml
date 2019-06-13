@@ -54,7 +54,7 @@ deploy:
         server: $OKE_URL
         token: $OKE_TOKEN
         insecure-skip-tls-verify: true
-        #command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml --namespace=default
+        command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml --namespace=default
 
     - kubectl:
         name: set deployment timeout
