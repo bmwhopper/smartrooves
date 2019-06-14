@@ -30,7 +30,7 @@ fi
 if [[ "$PASSWORD" == "" ]]; then
 	#statements
 	echo -n "Enter password of your BCS REST proxy and press [ENTER]: "
-    read -s -p PASSWORD
+    read -s PASSWORD
 fi
 
 echo
@@ -65,3 +65,5 @@ echo $RESPONSE
 checkRep $RESPONSE
 echo
 echo
+
+
