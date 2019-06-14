@@ -325,11 +325,11 @@ func (t *SmartRoovesChaincode) transferApartmentToGov(stub shim.ChaincodeStubInt
     return shim.Error(err.Error())
   }
 
-  if apartment.assigned {
+  if apartment.Assigned {
     return shim.Error("This apartment is alread assigned: " + apartmentId)
   }
 
-  apartment.owner := "gov"
+  apartment.Owner = "gov"
 
   apartmentJSONasBytes, err := json.Marshal(apartment)
   if err != nil {
@@ -405,17 +405,17 @@ func (t *SmartRoovesChaincode) assignApartmentToTenant(stub shim.ChaincodeStubIn
     return shim.Error(err.Error())
   }
 
-  if apartment.assigned {
+  if apartment.Assigned {
     return shim.Error("This apartment is alread assigned: " + apartmentId)
   }
-  if tenant.apartmentId != "null" {
+  if tenant.ApartmentId != "null" {
     return shim.Error("This tenant is already assigned to an apartment: " + ppsNumber)
   }
 
-  apartment.assigned := true
-  apartment.startLeaseDate := startLeaseDate
-  apartment.rentExtended := false
-  tenant.apartmentId := apartmentId
+  apartment.Assigned = true
+  apartment.StartLeaseDate = startLeaseDate
+  apartment.RentExtended = false
+  tenant.ApartmentId = apartmentId
 
   apartmentJSONasBytes, err := json.Marshal(apartment)
   if err != nil {
@@ -498,17 +498,17 @@ func (t *SmartRoovesChaincode) recallApartmentFromTenant(stub shim.ChaincodeStub
     return shim.Error(err.Error())
   }
 
-  if !apartment.assigned {
+  if !apartment.Assigned {
     return shim.Error("This apartment is not assigned to a tenant: " + apartmentId)
   }
-  if tenant.apartmentId != apartmentId {
+  if tenant.ApartmentId != apartmentId {
     return shim.Error("This tenant is not assigned to this apartment: " + ppsNumber)
   }
 
-  apartment.assigned := false
-  apartment.startLeaseDate := "null"
-  apartment.rentExtended := false
-  tenant.apartmentId := "null"
+  apartment.Assigned = false
+  apartment.StartLeaseDate = "null"
+  apartment.RentExtended = false
+  tenant.ApartmentId = "null"
 
   apartmentJSONasBytes, err := json.Marshal(apartment)
   if err != nil {
@@ -540,7 +540,7 @@ func (t *SmartRoovesChaincode) recallApartmentFromTenant(stub shim.ChaincodeStub
 // =========================================================================================
 // getAvailableApartments return all the apartments that are not assigned (assigned == false)
 // =========================================================================================
-func (t *AutoTraceChaincode) getAvailableApartments(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *SmartRoovesChaincode) getAvailableApartments(stub shim.ChaincodeStubInterface, args []string) pb.Response {
   queryString := fmt.Sprintf("SELECT valueJson FROM <STATE> WHERE json_extract(valueJson, '$.docType', '$.assigned') = '[\"apartment\",\"%s\"]'", false)
 
   queryResults, err := getQueryResultForQueryString(stub, queryString)
@@ -553,7 +553,7 @@ func (t *AutoTraceChaincode) getAvailableApartments(stub shim.ChaincodeStubInter
 // =========================================================================================
 // getAvailableTenants  return all the tenants that don't have an apartment assigned (apartmentId == "null")
 // =========================================================================================
-func (t *AutoTraceChaincode) getAvailableTenants(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *SmartRoovesChaincode) getAvailableTenants(stub shim.ChaincodeStubInterface, args []string) pb.Response {
   queryString := fmt.Sprintf("SELECT valueJson FROM <STATE> WHERE json_extract(valueJson, '$.docType', '$.apartmentId') = '[\"tenant\",\"%s\"]'", "null")
 
   queryResults, err := getQueryResultForQueryString(stub, queryString)
@@ -567,7 +567,7 @@ func (t *AutoTraceChaincode) getAvailableTenants(stub shim.ChaincodeStubInterfac
 // Query string matching state database syntax is passed in and executed as is.
 // Supports ad hoc queries that can be defined at runtime by the client.
 // =========================================================================================
-func (t *AutoTraceChaincode) querySmartRooves(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *SmartRoovesChaincode) querySmartRooves(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
   // "queryString"
   if len(args) < 1 {
@@ -624,7 +624,7 @@ func getQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString 
 // ===========================================================================================
 // getHistoryForRecord returns the histotical state transitions for a given key of a record
 // ===========================================================================================
-func (t *AutoTraceChaincode) getHistoryForRecord(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *SmartRoovesChaincode) getHistoryForRecord(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
   if len(args) < 1 {
     return shim.Error("Incorrect number of arguments. Expecting 1")
