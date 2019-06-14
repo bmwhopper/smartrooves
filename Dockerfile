@@ -1,9 +1,8 @@
-FROM node:8.0
+FROM node:7.10.1
 
 # install deps
 ADD package.json /tmp/package.json
-RUN cd /tmp 
-RUN npm install
+RUN cd /tmp && npm install
 
 # Copy deps
 RUN mkdir -p /opt/smartrooves && cp -a /tmp/node_modules /opt/smartrooves
