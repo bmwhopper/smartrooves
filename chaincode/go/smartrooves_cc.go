@@ -541,7 +541,7 @@ func (t *SmartRoovesChaincode) recallApartmentFromTenant(stub shim.ChaincodeStub
 // getAvailableApartments return all the apartments that are not assigned (assigned == false)
 // =========================================================================================
 func (t *SmartRoovesChaincode) getAvailableApartments(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-  queryString := fmt.Sprintf("SELECT valueJson FROM <STATE> WHERE json_extract(valueJson, '$.docType', '$.assigned') = '[\"apartment\",%s]'", false)
+  queryString := fmt.Sprintf("SELECT valueJson FROM <STATE> WHERE json_extract(valueJson, '$.docType', '$.assigned') = '[\"apartment\",%s]'", "false")
 
   queryResults, err := getQueryResultForQueryString(stub, queryString)
   if err != nil {
