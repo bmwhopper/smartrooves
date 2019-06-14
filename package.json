@@ -7,7 +7,9 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-
+  "dependencies": {
+    "express": "^4.16.1"
+  },
   "keywords": [
     "unique",
     "login"
@@ -17,8 +19,5 @@
     "url": "git://github.com/bmwhopper/smartrooves.git"
   },
   "author": "Brian Mathews",
-  "license": "UNLICENSED",
-  "dependencies": {
-    "express": "^4.15.0"
-  }
+  "license": "UNLICENSED"
 }
