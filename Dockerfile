@@ -1,15 +1,15 @@
-FROM node:7.7-alpine
+FROM node:8.0
 
 # install deps
 ADD package.json /tmp/package.json
 RUN cd /tmp && npm install
 
 # Copy deps
-RUN mkdir -p /opt/hello-world-app && cp -a /tmp/node_modules /opt/hello-world-app
+RUN mkdir -p /opt/smartrooves && cp -a /tmp/node_modules /opt/smartrooves
 
 # Setup workdir
-WORKDIR /opt/hello-world-app
-COPY . /opt/hello-world-app
+WORKDIR /opt/smartrooves
+COPY . /opt/smartrooves
 
 # run
 EXPOSE 3000
