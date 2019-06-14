@@ -1,17 +1,23 @@
 {
-  "name": "express-hello-world",
+  "name": "smartrooves",
   "version": "1.0.0",
-  "description": "Hello world app with express 4",
+  "description": "smartrooves admin and tenant application",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+
   "keywords": [
-    "express",
-    "hello-world"
+    "unique",
+    "login"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bmwhopper/smartrooves.git"
+  },
   "author": "Brian Mathews",
+  "license": "UNLICENSED",
   "dependencies": {
     "express": "^4.15.0"
   }
