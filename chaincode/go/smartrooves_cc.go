@@ -78,6 +78,8 @@ func (t *SmartRoovesChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Respo
     return t.transferApartmentToGov(stub, args)
   } else if function == "assignApartmentToTenant" { //assign an apartment to a tenant
     return t.assignApartmentToTenant(stub, args)
+  } else if function == "recallApartmentFromTenant" { //recall an apartment from a tenant
+    return t.recallApartmentFromTenant(stub, args)
   } else if function == "getAvailableApartments" { //return all available apartments
     return t.getAvailableApartments(stub, args)
   } else if function == "getAvailableTenants" { //return all the tenants that don't have an apartment assigned
@@ -291,7 +293,7 @@ func (t *SmartRoovesChaincode) initTenant(stub shim.ChaincodeStubInterface, args
 // ============================================================
 // transferApartmentToGov  - transfer apartment to government
 // ============================================================
-func (t *SmartRoovesChaincode) transferApartmentToGov (stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *SmartRoovesChaincode) transferApartmentToGov(stub shim.ChaincodeStubInterface, args []string) pb.Response {
   var err error
 
   // 0
@@ -348,7 +350,7 @@ func (t *SmartRoovesChaincode) transferApartmentToGov (stub shim.ChaincodeStubIn
 // ============================================================
 // assignApartmentToTenant  - assign an apartment to a tenant
 // ============================================================
-func (t *SmartRoovesChaincode) assignApartmentToTenant (stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *SmartRoovesChaincode) assignApartmentToTenant(stub shim.ChaincodeStubInterface, args []string) pb.Response {
   var err error
 
   // 0              1            2
@@ -442,6 +444,99 @@ func (t *SmartRoovesChaincode) assignApartmentToTenant (stub shim.ChaincodeStubI
   return shim.Success(nil)
 }
 
+// ============================================================
+// recallApartmentFromTenant - recall an apartment from a tenant
+// ============================================================
+func (t *SmartRoovesChaincode) recallApartmentFromTenant(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+  var err error
+
+  // 0              1
+  // "apartmentId", "ppsNumber"
+  if len(args) != 2 {
+    return shim.Error("Incorrect number of arguments. Expecting 2")
+  }
+
+  // ==== Input sanitation ====
+  fmt.Println("- start recall apartment from tenant")
+  if len(args[0]) <= 0 {
+    return shim.Error("1st argument must be a non-empty string")
+  }
+  if len(args[1]) <= 0 {
+    return shim.Error("2nd argument must be a non-empty string")
+  }
+
+  apartmentId := strings.ToLower(args[0])
+  ppsNumber := strings.ToLower(args[1])
+
+  // ==== Check if apartment already exists ====
+  apartmentAsBytes, err := stub.GetState(apartmentId)
+  if err != nil {
+    return shim.Error("Failed to get apartment: " + err.Error())
+  } else if apartmentAsBytes == nil {
+    fmt.Println("This apartment does not exist: " + apartmentId)
+    return shim.Error("This apartment does not exist: " + apartmentId)
+  }
+
+  // ==== Check if tenant already exists ====
+  tenantAsBytes, err := stub.GetState(ppsNumber)
+  if err != nil {
+    return shim.Error("Failed to get tenant: " + err.Error())
+  } else if tenantAsBytes == nil {
+    fmt.Println("This tenant does not exist: " + ppsNumber)
+    return shim.Error("This tenant does not exist: " + ppsNumber)
+  }
+
+  apartment := apartment{}
+  err = json.Unmarshal(apartmentAsBytes, &apartment) //unmarshal it aka JSON.parse()
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  tenant := tenant{}
+  err = json.Unmarshal(tenantAsBytes, &tenant) //unmarshal it aka JSON.parse()
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  if !apartment.assigned {
+    return shim.Error("This apartment is not assigned to a tenant: " + apartmentId)
+  }
+  if tenant.apartmentId != apartmentId {
+    return shim.Error("This tenant is not assigned to this apartment: " + ppsNumber)
+  }
+
+  apartment.assigned := false
+  apartment.startLeaseDate := "null"
+  apartment.rentExtended := false
+  tenant.apartmentId := "null"
+
+  apartmentJSONasBytes, err := json.Marshal(apartment)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  // === Save apartment to state ===
+  err = stub.PutState(apartmentId, apartmentJSONasBytes)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  tenantJSONasBytes, err := json.Marshal(tenant)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  // === Save tenant to state ===
+  err = stub.PutState(ppsNumber, tenantJSONasBytes)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  // ==== Tenant saved and indexed. Return success ====
+  fmt.Println("- end recall apartment from tenant")
+  return shim.Success(nil)
+}
+
 // =========================================================================================
 // getAvailableApartments return all the apartments that are not assigned (assigned == false)
 // =========================================================================================
@@ -458,7 +553,7 @@ func (t *AutoTraceChaincode) getAvailableApartments(stub shim.ChaincodeStubInter
 // =========================================================================================
 // getAvailableTenants  return all the tenants that don't have an apartment assigned (apartmentId == "null")
 // =========================================================================================
-func (t *AutoTraceChaincode) getAvailableTenants (stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (t *AutoTraceChaincode) getAvailableTenants(stub shim.ChaincodeStubInterface, args []string) pb.Response {
   queryString := fmt.Sprintf("SELECT valueJson FROM <STATE> WHERE json_extract(valueJson, '$.docType', '$.apartmentId') = '[\"tenant\",\"%s\"]'", "null")
 
   queryResults, err := getQueryResultForQueryString(stub, queryString)
