@@ -86,7 +86,7 @@ func (t *SmartRoovesChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Respo
     return t.querySmartRooves(stub, args)
   } else if function == "getHistoryForRecord" { //get history of values for a record
     return t.getHistoryForRecord(stub, args)
-  } 
+  }
 
   fmt.Println("invoke did not find func: " + function) //error
   return shim.Error("Received unknown function invocation")
@@ -163,7 +163,7 @@ func (t *SmartRoovesChaincode) initApartment(stub shim.ChaincodeStubInterface, a
   }
   startLeaseDate := strings.ToLower(args[8])
   owner := strings.ToLower(args[9])
-    
+
   // ==== Check if apartment already exists ====
   apartmentAsBytes, err := stub.GetState(apartmentId)
   if err != nil {
@@ -176,7 +176,7 @@ func (t *SmartRoovesChaincode) initApartment(stub shim.ChaincodeStubInterface, a
   // ==== Create apartment object and marshal to JSON ====
   objectType := "apartment"
   apartment := &apartment{objectType, apartmentId, capacity, address, annualRent, govAnnualRentAllow, assigned, rentExtended, accessibility, startLeaseDate, owner}
-  
+
   apartmentJSONasBytes, err := json.Marshal(apartment)
   if err != nil {
     return shim.Error(err.Error())
@@ -258,7 +258,7 @@ func (t *SmartRoovesChaincode) initTenant(stub shim.ChaincodeStubInterface, args
     return shim.Error("9th argument must be a boolean string")
   }
   apartmentId := strings.ToLower(args[9])
-  
+
   // ==== Check if tenant already exists ====
   tenantAsBytes, err := stub.GetState(ppsNumber)
   if err != nil {
@@ -271,7 +271,7 @@ func (t *SmartRoovesChaincode) initTenant(stub shim.ChaincodeStubInterface, args
   // ==== Create tenant object and marshal to JSON ====
   objectType := "tenant"
   tenant := &tenant{objectType, ppsNumber, firstName, lastName, dateOfBirth, maritalStatus, familyComponents, annualIncome, maxRentSpend, disability, apartmentId}
-  
+
   tenantJSONasBytes, err := json.Marshal(tenant)
   if err != nil {
     return shim.Error(err.Error())
@@ -323,12 +323,12 @@ func (t *SmartRoovesChaincode) transferApartmentToGov (stub shim.ChaincodeStubIn
     return shim.Error(err.Error())
   }
 
-  if apartment.assigned == true {
+  if apartment.assigned {
     return shim.Error("This apartment is alread assigned: " + apartmentId)
-  } 
+  }
 
   apartment.owner := "gov"
-  
+
   apartmentJSONasBytes, err := json.Marshal(apartment)
   if err != nil {
     return shim.Error(err.Error())
@@ -403,9 +403,9 @@ func (t *SmartRoovesChaincode) assignApartmentToTenant (stub shim.ChaincodeStubI
     return shim.Error(err.Error())
   }
 
-  if apartment.assigned == true {
+  if apartment.assigned {
     return shim.Error("This apartment is alread assigned: " + apartmentId)
-  } 
+  }
   if tenant.apartmentId != "null" {
     return shim.Error("This tenant is already assigned to an apartment: " + ppsNumber)
   }
@@ -414,7 +414,7 @@ func (t *SmartRoovesChaincode) assignApartmentToTenant (stub shim.ChaincodeStubI
   apartment.startLeaseDate := startLeaseDate
   apartment.rentExtended := false
   tenant.apartmentId := apartmentId
-  
+
   apartmentJSONasBytes, err := json.Marshal(apartment)
   if err != nil {
     return shim.Error(err.Error())
@@ -425,12 +425,12 @@ func (t *SmartRoovesChaincode) assignApartmentToTenant (stub shim.ChaincodeStubI
   if err != nil {
     return shim.Error(err.Error())
   }
-  
+
   tenantJSONasBytes, err := json.Marshal(tenant)
   if err != nil {
     return shim.Error(err.Error())
   }
-  
+
   // === Save tenant to state ===
   err = stub.PutState(ppsNumber, tenantJSONasBytes)
   if err != nil {
