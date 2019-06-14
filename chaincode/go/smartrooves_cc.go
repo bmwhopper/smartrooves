@@ -1,12 +1,12 @@
 package main
 
 import (
-  //"bytes"
+  "bytes"
   "encoding/json"
   "fmt"
   "strconv"
   "strings"
-  //"time"
+  "time"
 
   "github.com/hyperledger/fabric/core/chaincode/shim"
   pb "github.com/hyperledger/fabric/protos/peer"
@@ -70,11 +70,23 @@ func (t *SmartRoovesChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Respo
   fmt.Println("invoke is running " + function)
 
   // Handle different functions
-  if function == "initApartment" { //create a new initApartment
+  if function == "initApartment" { //create a new apartment
     return t.initApartment(stub, args)
-  // } else if function == "transferVehiclePart" { //change owner of a specific vehicle part
-    // return t.transferVehiclePart(stub, args)
-  }
+  } else if function == "initTenant" { //create a new tenant
+    return t.initTenant(stub, args)
+  } else if function == "transferApartmentToGov" { //transfer ownership of an apartment to the government
+    return t.transferApartmentToGov(stub, args)
+  } else if function == "assignApartmentToTenant" { //assign an apartment to a tenant
+    return t.assignApartmentToTenant(stub, args)
+  } else if function == "getAvailableApartments" { //return all available apartments
+    return t.getAvailableApartments(stub, args)
+  } else if function == "getAvailableTenants" { //return all the tenants that don't have an apartment assigned
+    return t.getAvailableTenants(stub, args)
+  } else if function == "querySmartRooves" { //return results based on input query string
+    return t.querySmartRooves(stub, args)
+  } else if function == "getHistoryForRecord" { //get history of values for a record
+    return t.getHistoryForRecord(stub, args)
+  } 
 
   fmt.Println("invoke did not find func: " + function) //error
   return shim.Error("Received unknown function invocation")
@@ -274,4 +286,310 @@ func (t *SmartRoovesChaincode) initTenant(stub shim.ChaincodeStubInterface, args
   // ==== Tenant saved and indexed. Return success ====
   fmt.Println("- end init tenant")
   return shim.Success(nil)
+}
+
+// ============================================================
+// transferApartmentToGov  - transfer apartment to government
+// ============================================================
+func (t *SmartRoovesChaincode) transferApartmentToGov (stub shim.ChaincodeStubInterface, args []string) pb.Response {
+  var err error
+
+  // 0
+  // "apartmentId"
+  if len(args) != 1 {
+    return shim.Error("Incorrect number of arguments. Expecting 1")
+  }
+
+  // ==== Input sanitation ====
+  fmt.Println("- start transfer apartment to government")
+  if len(args[0]) <= 0 {
+    return shim.Error("1st argument must be a non-empty string")
+  }
+
+  apartmentId := strings.ToLower(args[0])
+
+  // ==== Check if apartment already exists ====
+  apartmentAsBytes, err := stub.GetState(apartmentId)
+  if err != nil {
+    return shim.Error("Failed to get apartment: " + err.Error())
+  } else if apartmentAsBytes == nil {
+    fmt.Println("This apartment does not exist: " + apartmentId)
+    return shim.Error("This apartment does not exist: " + apartmentId)
+  }
+
+  apartment := apartment{}
+  err = json.Unmarshal(apartmentAsBytes, &apartment) //unmarshal it aka JSON.parse()
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  if apartment.assigned == true {
+    return shim.Error("This apartment is alread assigned: " + apartmentId)
+  } 
+
+  apartment.owner := "gov"
+  
+  apartmentJSONasBytes, err := json.Marshal(apartment)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  // === Save apartment to state ===
+  err = stub.PutState(apartmentId, apartmentJSONasBytes)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  // ==== Tenant saved and indexed. Return success ====
+  fmt.Println("- end transfer apartment to government")
+  return shim.Success(nil)
+}
+
+// ============================================================
+// assignApartmentToTenant  - assign an apartment to a tenant
+// ============================================================
+func (t *SmartRoovesChaincode) assignApartmentToTenant (stub shim.ChaincodeStubInterface, args []string) pb.Response {
+  var err error
+
+  // 0              1            2
+  // "apartmentId", "ppsNumber", "startLeaseDate"
+  if len(args) != 3 {
+    return shim.Error("Incorrect number of arguments. Expecting 3")
+  }
+
+  // ==== Input sanitation ====
+  fmt.Println("- start assign apartment to tenant")
+  if len(args[0]) <= 0 {
+    return shim.Error("1st argument must be a non-empty string")
+  }
+  if len(args[1]) <= 0 {
+    return shim.Error("2nd argument must be a non-empty string")
+  }
+  if len(args[2]) <= 0 {
+    return shim.Error("3rd argument must be a non-empty string")
+  }
+
+  apartmentId := strings.ToLower(args[0])
+  ppsNumber := strings.ToLower(args[1])
+  startLeaseDate := strings.ToLower(args[2])
+
+  // ==== Check if apartment already exists ====
+  apartmentAsBytes, err := stub.GetState(apartmentId)
+  if err != nil {
+    return shim.Error("Failed to get apartment: " + err.Error())
+  } else if apartmentAsBytes == nil {
+    fmt.Println("This apartment does not exist: " + apartmentId)
+    return shim.Error("This apartment does not exist: " + apartmentId)
+  }
+
+  // ==== Check if tenant already exists ====
+  tenantAsBytes, err := stub.GetState(ppsNumber)
+  if err != nil {
+    return shim.Error("Failed to get tenant: " + err.Error())
+  } else if tenantAsBytes == nil {
+    fmt.Println("This tenant does not exist: " + ppsNumber)
+    return shim.Error("This tenant does not exist: " + ppsNumber)
+  }
+
+  apartment := apartment{}
+  err = json.Unmarshal(apartmentAsBytes, &apartment) //unmarshal it aka JSON.parse()
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  tenant := tenant{}
+  err = json.Unmarshal(tenantAsBytes, &tenant) //unmarshal it aka JSON.parse()
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  if apartment.assigned == true {
+    return shim.Error("This apartment is alread assigned: " + apartmentId)
+  } 
+  if tenant.apartmentId != "null" {
+    return shim.Error("This tenant is already assigned to an apartment: " + ppsNumber)
+  }
+
+  apartment.assigned := true
+  apartment.startLeaseDate := startLeaseDate
+  apartment.rentExtended := false
+  tenant.apartmentId := apartmentId
+  
+  apartmentJSONasBytes, err := json.Marshal(apartment)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  // === Save apartment to state ===
+  err = stub.PutState(apartmentId, apartmentJSONasBytes)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+  
+  tenantJSONasBytes, err := json.Marshal(tenant)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+  
+  // === Save tenant to state ===
+  err = stub.PutState(ppsNumber, tenantJSONasBytes)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+
+  // ==== Tenant saved and indexed. Return success ====
+  fmt.Println("- end assign apartment to tenant")
+  return shim.Success(nil)
+}
+
+// =========================================================================================
+// getAvailableApartments return all the apartments that are not assigned (assigned == false)
+// =========================================================================================
+func (t *AutoTraceChaincode) getAvailableApartments(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+  queryString := fmt.Sprintf("SELECT valueJson FROM <STATE> WHERE json_extract(valueJson, '$.docType', '$.assigned') = '[\"apartment\",\"%s\"]'", false)
+
+  queryResults, err := getQueryResultForQueryString(stub, queryString)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+  return shim.Success(queryResults)
+}
+
+// =========================================================================================
+// getAvailableTenants  return all the tenants that don't have an apartment assigned (apartmentId == "null")
+// =========================================================================================
+func (t *AutoTraceChaincode) getAvailableTenants (stub shim.ChaincodeStubInterface, args []string) pb.Response {
+  queryString := fmt.Sprintf("SELECT valueJson FROM <STATE> WHERE json_extract(valueJson, '$.docType', '$.apartmentId') = '[\"tenant\",\"%s\"]'", "null")
+
+  queryResults, err := getQueryResultForQueryString(stub, queryString)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+  return shim.Success(queryResults)
+}
+
+// =========================================================================================
+// Query string matching state database syntax is passed in and executed as is.
+// Supports ad hoc queries that can be defined at runtime by the client.
+// =========================================================================================
+func (t *AutoTraceChaincode) querySmartRooves(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+  // "queryString"
+  if len(args) < 1 {
+    return shim.Error("Incorrect number of arguments. Expecting 1")
+  }
+
+  queryString := args[0]
+
+  queryResults, err := getQueryResultForQueryString(stub, queryString)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+  return shim.Success(queryResults)
+}
+
+// =========================================================================================
+// getQueryResultForQueryString executes the passed in query string.
+// Result set is built and returned as a byte array containing the JSON results.
+// =========================================================================================
+func getQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string) ([]byte, error) {
+
+  fmt.Printf("- getQueryResultForQueryString queryString:\n%s\n", queryString)
+
+  resultsIterator, err := stub.GetQueryResult(queryString)
+  if err != nil {
+    return nil, err
+  }
+  defer resultsIterator.Close()
+
+  // buffer is a JSON array containing QueryRecords
+  var buffer bytes.Buffer
+  buffer.WriteString("[")
+
+  bArrayMemberAlreadyWritten := false
+  for resultsIterator.HasNext() {
+    queryResponse, err := resultsIterator.Next()
+    if err != nil {
+      return nil, err
+    }
+    // Add a comma before array members, suppress it for the first array member
+    if bArrayMemberAlreadyWritten == true {
+      buffer.WriteString(",")
+    }
+    buffer.WriteString(string(queryResponse.Value))
+    bArrayMemberAlreadyWritten = true
+  }
+  buffer.WriteString("]")
+
+  fmt.Printf("- getQueryResultForQueryString queryResult:\n%s\n", buffer.String())
+
+  return buffer.Bytes(), nil
+}
+
+// ===========================================================================================
+// getHistoryForRecord returns the histotical state transitions for a given key of a record
+// ===========================================================================================
+func (t *AutoTraceChaincode) getHistoryForRecord(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+  if len(args) < 1 {
+    return shim.Error("Incorrect number of arguments. Expecting 1")
+  }
+
+  recordKey := args[0]
+
+  fmt.Printf("- start getHistoryForRecord: %s\n", recordKey)
+
+  resultsIterator, err := stub.GetHistoryForKey(recordKey)
+  if err != nil {
+    return shim.Error(err.Error())
+  }
+  defer resultsIterator.Close()
+
+  // buffer is a JSON array containing historic values for the key/value pair
+  var buffer bytes.Buffer
+  buffer.WriteString("[")
+
+  bArrayMemberAlreadyWritten := false
+  for resultsIterator.HasNext() {
+    response, err := resultsIterator.Next()
+    if err != nil {
+      return shim.Error(err.Error())
+    }
+    // Add a comma before array members, suppress it for the first array member
+    if bArrayMemberAlreadyWritten == true {
+      buffer.WriteString(",")
+    }
+    buffer.WriteString("{\"TxId\":")
+    buffer.WriteString("\"")
+    buffer.WriteString(response.TxId)
+    buffer.WriteString("\"")
+
+    buffer.WriteString(", \"Value\":")
+    // if it was a delete operation on given key, then we need to set the
+    //corresponding value null. Else, we will write the response.Value
+    //as-is (as the Value itself a JSON vehiclePart)
+    if response.IsDelete {
+      buffer.WriteString("null")
+    } else {
+      buffer.WriteString(string(response.Value))
+    }
+
+    buffer.WriteString(", \"Timestamp\":")
+    buffer.WriteString("\"")
+    buffer.WriteString(time.Unix(response.Timestamp.Seconds, int64(response.Timestamp.Nanos)).String())
+    buffer.WriteString("\"")
+
+    buffer.WriteString(", \"IsDelete\":")
+    buffer.WriteString("\"")
+    buffer.WriteString(strconv.FormatBool(response.IsDelete))
+    buffer.WriteString("\"")
+
+    buffer.WriteString("}")
+    bArrayMemberAlreadyWritten = true
+  }
+  buffer.WriteString("]")
+
+  fmt.Printf("- getHistoryForRecord returning:\n%s\n", buffer.String())
+
+  return shim.Success(buffer.Bytes())
 }
