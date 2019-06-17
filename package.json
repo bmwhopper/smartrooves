@@ -2,13 +2,15 @@
   "name": "smartrooves",
   "version": "1.0.0",
   "description": "smartrooves admin and tenant application",
-  "main": "index.js",
+  "main": "login.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node login.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "express": "^4.16.1"
+    "express": "^4.17.1",
+     "mysql": ">=2.5.0",
+     "express-session": "^1.16.2"
   },
   "keywords": [
     "unique",
