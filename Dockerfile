@@ -1,14 +1,12 @@
-FROM node:7.10.1
+FROM node:8
+  
+WORKDIR /opt/smartrooves
 
 # install deps
-ADD package.json /tmp/package.json
-RUN cd /tmp && npm install
-
-# Copy deps
-RUN mkdir -p /opt/smartrooves && cp -a /tmp/node_modules /opt/smartrooves
+COPY package.json /opt/smartrooves
+RUN npm install
 
 # Setup workdir
-WORKDIR /opt/smartrooves
 COPY . /opt/smartrooves
 
 # run
