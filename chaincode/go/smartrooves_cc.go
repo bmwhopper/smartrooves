@@ -426,7 +426,7 @@ func (t *SmartRoovesChaincode) assignApartmentToTenant(stub shim.ChaincodeStubIn
   if apartment.Capacity < tenant.FamilyComponents {
     return shim.Error("This apartment does not have enough capacity for this tenant: " + ppsNumber)
   }
-  if apartment.AnnualRent - apartment.GovAnnualRentAllow > tenant.maxRentSpend {
+  if apartment.AnnualRent - apartment.GovAnnualRentAllow > tenant.MaxRentSpend {
     return shim.Error("This apartment is too expensive for this tenant: " + ppsNumber)
   }
 
