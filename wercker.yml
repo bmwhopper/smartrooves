@@ -38,6 +38,10 @@ deploy:
     id: node:latest
   steps:
     - script:
+        name: Prepare Kubernetes files
+        code: mkdir $WERCKER_ROOT/kubernetes
+        code: mv kubernetes_*.yml $WERCKER_ROOT/kubernetes
+    - script:
         name: "Replace repository url"
         code: sed -i -e "s^registry^$OCIR_REGISTRY^g" $WERCKER_ROOT/kubernetes_deployment.yml
     - script:
@@ -58,15 +62,16 @@ deploy:
         command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml
 
 
-  #   - kubectl:
-  #       name: set deployment timeout
-   #      server: $OKE_URL
-     #    token: $OKE_TOKEN
-     #    insecure-skip-tls-verify: true
+    - kubectl:
+        name: set deployment timeout
+        server: $OKE_URL
+        token: $OKE_TOKEN
+        insecure-skip-tls-verify: true
+        command: patch deployment/smartrooves -p '{"spec":{"progressDeadlineSeconds":60}}'
        
-  #   - kubectl:
-    #     name: check deployment status
-     #    server: $OKE_URL
-      #   token: $OKE_TOKEN
-       #  insecure-skip-tls-verify: true
-       #  command: rollout status deployment/smartrooves
+    - kubectl:
+        name: check deployment status
+        server: $OKE_URL
+        token: $OKE_TOKEN
+        insecure-skip-tls-verify: true
+        command: rollout status deployment/smartrooves
