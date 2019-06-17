@@ -38,18 +38,14 @@ deploy:
     id: node:latest
   steps:
     - script:
-        name: Prepare Kubernetes files
-        code: mkdir $WERCKER_ROOT/kubernetes
-        code: mv kubernetes_*.yml $WERCKER_ROOT/kubernetes
-    - script:
         name: "Replace repository url"
-        code: sed -i -e "s^registry^$OCIR_REGISTRY^g" $WERCKER_ROOT/kubernetes/kubernetes_deployment.yml
+        code: sed -i -e "s^registry^$OCIR_REGISTRY^g" $WERCKER_ROOT/kubernetes_deployment.yml
     - script:
         name: "Replace repository"
-        code: sed -i -e "s^repository^$OCIR_REPOSITORY^g" $WERCKER_ROOT/kubernetes/kubernetes_deployment.yml  
+        code: sed -i -e "s^repository^$OCIR_REPOSITORY^g" $WERCKER_ROOT/kubernetes_deployment.yml  
     - script:
         name: "Replace password"
-        code: sed -i -e "s^ocirsecret^$OCIR_PASSWORD^g" $WERCKER_ROOT/kubernetes/kubernetes_deployment.yml
+        code: sed -i -e "s^ocirsecret^$OCIR_PASSWORD^g" $WERCKER_ROOT/kubernetes_deployment.yml
     - script:
         name: "Visualise Kubernetes config"
         code: cat kubernetes_deployment.yml
@@ -59,7 +55,7 @@ deploy:
         server: $OKE_URL
         token: $OKE_TOKEN
         insecure-skip-tls-verify: true
-        command: apply -f $WERCKER_ROOT/kubernetes/
+        command: apply -f $WERCKER_ROOT/
 
 
     - kubectl:
