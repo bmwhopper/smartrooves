@@ -30,8 +30,8 @@ push:
         username: $OCIR_USERNAME
         password: $OCIR_PASSWORD
         repository: $OCIR_REPOSITORY
-        tag: v1
-        registry: https://$OCIR_REGISTRY/v2
+        tag: smartrooves
+        registry: https://$OCIR_REGISTRY/
 
 deploy:
   box: 
@@ -55,15 +55,8 @@ deploy:
         server: $OKE_URL
         token: $OKE_TOKEN
         insecure-skip-tls-verify: true
-        command: apply -f $WERCKER_ROOT/
+        command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml
 
-
-    - kubectl:
-        name: set deployment timeout
-        server: $OKE_URL
-        token: $OKE_TOKEN
-        insecure-skip-tls-verify: true
-        command: patch deployment/smartrooves -p '{"spec":{"progressDeadlineSeconds":60}}'
        
     - kubectl:
         name: check deployment status
