@@ -3,7 +3,7 @@
 ##Default setting
 CHANNEL_NAME="default"
 CC_NAME="smartrooves_cc"
-CC_VERSION="v10"
+CC_VERSION="v12"
 REST_ADDR="https://DC6CD508163343B6821EDF6A568BF8DB.blockchain.ocp.oraclecloud.com:443/restproxy1"
 USER=""
 PASSWORD=""
@@ -59,7 +59,17 @@ echo "Set Initial State of the Ledger"
 echo "Invocation - create a new apartment"
 echo
 RESPONSE=$(curl -H "Content-type:application/json" -X POST -u $USER:$PASSWORD \
--d '{"channel":"'"$CHANNEL_NAME"'","chaincode":"'"$CC_NAME"'","method":"initApartment","args":["apt00001", "4", "EastPoint Dublin 3", "15000", "10000", "false", "false", "true", "null", "Gov"],"chaincodeVer":"'"$CC_VERSION"'"}' \
+-d '{"channel":"'"$CHANNEL_NAME"'","chaincode":"'"$CC_NAME"'","method":"initApartment","args":["apt00006", "6", "Talbot Dublin 1", "12000", "11000", "false", "false", "true", "null", "HA2"],"chaincodeVer":"'"$CC_VERSION"'"}' \
+$REST_ADDR/bcsgw/rest/v1/transaction/invocation);
+echo $RESPONSE
+checkRep $RESPONSE
+echo
+echo
+
+echo "Invocation - transfer apartment to Gov"
+echo
+RESPONSE=$(curl -H "Content-type:application/json" -X POST -u $USER:$PASSWORD \
+-d '{"channel":"'"$CHANNEL_NAME"'","chaincode":"'"$CC_NAME"'","method":"transferApartmentToGov","args":["apt00006"],"chaincodeVer":"'"$CC_VERSION"'"}' \
 $REST_ADDR/bcsgw/rest/v1/transaction/invocation);
 echo $RESPONSE
 checkRep $RESPONSE
@@ -69,7 +79,17 @@ echo
 echo "Invocation - create a new tenant"
 echo
 RESPONSE=$(curl -H "Content-type:application/json" -X POST -u $USER:$PASSWORD \
--d '{"channel":"'"$CHANNEL_NAME"'","chaincode":"'"$CC_NAME"'","method":"initTenant","args":["12234234VA", "James", "Dublin", "05/03/1980", "single", "1", "5500", "1500", "true", "null"],"chaincodeVer":"'"$CC_VERSION"'"}' \
+-d '{"channel":"'"$CHANNEL_NAME"'","chaincode":"'"$CC_NAME"'","method":"initTenant","args":["124567VA", "Ciara", "Dublin", "05/05/1981", "married", "5", "6500", "5000", "false", "null"],"chaincodeVer":"'"$CC_VERSION"'"}' \
+$REST_ADDR/bcsgw/rest/v1/transaction/invocation);
+echo $RESPONSE
+checkRep $RESPONSE
+echo
+echo
+
+echo "Invocation - assign apartment to tenant"
+echo
+RESPONSE=$(curl -H "Content-type:application/json" -X POST -u $USER:$PASSWORD \
+-d '{"channel":"'"$CHANNEL_NAME"'","chaincode":"'"$CC_NAME"'","method":"assignApartmentToTenant","args":["apt00006", "124567VA", "18/06/2019"],"chaincodeVer":"'"$CC_VERSION"'"}' \
 $REST_ADDR/bcsgw/rest/v1/transaction/invocation);
 echo $RESPONSE
 checkRep $RESPONSE
