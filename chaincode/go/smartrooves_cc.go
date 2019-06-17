@@ -165,6 +165,10 @@ func (t *SmartRoovesChaincode) initApartment(stub shim.ChaincodeStubInterface, a
   }
   startLeaseDate := strings.ToLower(args[8])
   owner := strings.ToLower(args[9])
+  
+  if annualRent < govAnnualRentAllow {
+    return shim.Error("Annual rent must be greater or equal than Goverment allowance")
+  }
 
   // ==== Check if apartment already exists ====
   apartmentAsBytes, err := stub.GetState(apartmentId)
@@ -260,6 +264,10 @@ func (t *SmartRoovesChaincode) initTenant(stub shim.ChaincodeStubInterface, args
     return shim.Error("9th argument must be a boolean string")
   }
   apartmentId := strings.ToLower(args[9])
+  
+  if annualIncome < maxRentSpend {
+    return shim.Error("Annual income must be greater or equal than maximum rent spend")
+  }
 
   // ==== Check if tenant already exists ====
   tenantAsBytes, err := stub.GetState(ppsNumber)
@@ -326,7 +334,11 @@ func (t *SmartRoovesChaincode) transferApartmentToGov(stub shim.ChaincodeStubInt
   }
 
   if apartment.Assigned {
-    return shim.Error("This apartment is alread assigned: " + apartmentId)
+    return shim.Error("This apartment is alread assigned to a tenant: " + apartmentId)
+  }
+  
+  if apartment.Owner == "gov" {
+    return shim.Error("This apartment is alread assigned to gov: " + apartmentId)
   }
 
   apartment.Owner = "gov"
@@ -406,10 +418,16 @@ func (t *SmartRoovesChaincode) assignApartmentToTenant(stub shim.ChaincodeStubIn
   }
 
   if apartment.Assigned {
-    return shim.Error("This apartment is alread assigned: " + apartmentId)
+    return shim.Error("This apartment is alread assigned to a tenant: " + apartmentId)
   }
   if tenant.ApartmentId != "null" {
     return shim.Error("This tenant is already assigned to an apartment: " + ppsNumber)
+  }
+  if apartment.Capacity < tenant.FamilyComponents {
+    return shim.Error("This apartment does not have enough capacity for this tenant: " + ppsNumber)
+  }
+  if apartment.AnnualRent - apartment.GovAnnualRentAllow > tenant.maxRentSpend {
+    return shim.Error("This apartment is too expensive for this tenant: " + ppsNumber)
   }
 
   apartment.Assigned = true
