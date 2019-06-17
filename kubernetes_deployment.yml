@@ -8,20 +8,19 @@ spec:
     metadata:
       labels:
         app: smartrooves
-        version: v1
     spec:
       containers:
       - name: hackathon
-        image: registry/repository:v1
+        image: registry/repository
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
           protocol: TCP
       imagePullSecrets:
-      - name: ocirsecret  
+      - name: ocirsecret 
       restartPolicy: Always
 ---
-apiVersion: v1
+apiVersion: latest
 kind: Service
 metadata:
   name: smartrooves
