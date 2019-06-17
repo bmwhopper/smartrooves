@@ -57,15 +57,15 @@ deploy:
         insecure-skip-tls-verify: true
         command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml
 
-    - kubectl:
-        name: set deployment timeout
-        server: $OKE_URL
-        token: $OKE_TOKEN
-        insecure-skip-tls-verify: true
+  #   - kubectl:
+  #       name: set deployment timeout
+   #      server: $OKE_URL
+     #    token: $OKE_TOKEN
+     #    insecure-skip-tls-verify: true
        
-    - kubectl:
-        name: check deployment status
-        server: $OKE_URL
-        token: $OKE_TOKEN
-        insecure-skip-tls-verify: true
-        command: rollout status deployment/smartrooves
+  #   - kubectl:
+    #     name: check deployment status
+     #    server: $OKE_URL
+      #   token: $OKE_TOKEN
+       #  insecure-skip-tls-verify: true
+       #  command: rollout status deployment/smartrooves
