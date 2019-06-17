@@ -45,7 +45,7 @@ deploy:
         code: sed -i -e "s^repository^$OCIR_REPOSITORY^g" $WERCKER_ROOT/kubernetes_deployment.yml  
     - script:
         name: "Replace password"
-        code: sed -i -e "s^ocirsecretname^$OCIR_PASSWORD^g" $WERCKER_ROOT/kubernetes_deployment.yml 
+        code: sed -i -e "s^ocirsecret^$OCIR_PASSWORD^g" $WERCKER_ROOT/kubernetes_deployment.yml 
     - script:
         name: "Visualise Kubernetes config"
         code: cat kubernetes_deployment.yml
