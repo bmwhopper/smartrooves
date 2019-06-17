@@ -57,6 +57,7 @@ deploy:
         insecure-skip-tls-verify: true
         command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml
 
+
   #   - kubectl:
   #       name: set deployment timeout
    #      server: $OKE_URL
