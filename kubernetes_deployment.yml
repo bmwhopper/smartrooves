@@ -1,3 +1,4 @@
+
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -8,19 +9,20 @@ spec:
     metadata:
       labels:
         app: smartrooves
+        version: v1
     spec:
       containers:
       - name: hackathon
-        image: registry/repository
+        image: registry/repository:v1
         imagePullPolicy: Always
         ports:
-        - containerPort: 8080
+        - containerPort: 3000
           protocol: TCP
       imagePullSecrets:
-      - name: ocirsecret 
+      - name: ocirsecret  
       restartPolicy: Always
 ---
-apiVersion: latest
+apiVersion: v1
 kind: Service
 metadata:
   name: smartrooves
@@ -28,7 +30,7 @@ metadata:
     app: smartrooves
 spec:
   ports:
-  - port: 8080
+  - port: 3000
     name: http
   selector:
     app: smartrooves
