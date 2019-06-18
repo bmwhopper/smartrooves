@@ -1,0 +1,21 @@
+{
+    "name": "fabcar",
+    "version": "1.0.0",
+    "description": "Hyperledger Fabric Car Sample Application",
+    "main": "fabcar.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Anthony O'Dowd",
+    "license": "Apache-2.0",
+    "keywords": [
+        "Hyperledger",
+        "Fabric",
+        "Car",
+        "Sample",
+        "Application"
+    ],
+    "dependencies": {
+        "log4js": "^0.6.38"
+    }
+}
