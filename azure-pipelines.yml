@@ -14,8 +14,53 @@ steps:
   inputs:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
+    - npm-install
+    - internal/watch:
+        code: node login.js
+        reload: true
+test:
+  # The steps that will be executed on build
+  steps:
+    - script:
+        code: export NODE_ENV='testing'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+
+    # A custom script step, name value is used in the UI
+    # and the code value contains the command that get executed
+    - script:
+        name: echo nodejs information
+        code: |
+          echo "node version $(node -v) running"
+          echo "npm version $(npm -v) running"
+push:
+  steps:
+    - internal/push:
+        username: $OCIR_USERNAME
+        password: $OCIR_PASSWORD
+        repository: $OCIR_REPOSITORY
+        tag: smartrooves
+        registry: https://$OCIR_REGISTRY/
+
+deploy:
+  box: 
+    id: node:latest
+  steps:
+    - script:
+        name: "Replace repository url"
+        code: sed -i -e "s^registry^$OCIR_REGISTRY^g" $WERCKER_ROOT/kubernetes_deployment.yml
+    - script:
+        name: "Replace repository"
+        code: sed -i -e "s^repository^$OCIR_REPOSITORY^g" $WERCKER_ROOT/kubernetes_deployment.yml  
+    - script:
+        name: "Replace password"
+        code: sed -i -e "s^ocirsecret^$OCIR_PASSWORD^g" $WERCKER_ROOT/kubernetes_deployment.yml
+    - script:
+        name: "Visualise Kubernetes config"
+        code: cat kubernetes_deployment.yml
+        
+    - kubectl:
+        name: deploy to oke
+        server: $OKE_URL
+        token: $OKE_TOKEN
+        insecure-skip-tls-verify: true
+command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml
