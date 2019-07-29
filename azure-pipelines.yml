@@ -14,8 +14,8 @@ steps:
   inputs:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
-    - npm-install
-    - internal/watch:
+     'npm-install'
+    internal/watch:
         code: node login.js
         reload: true
 test:
