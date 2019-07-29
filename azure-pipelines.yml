@@ -22,7 +22,7 @@ steps:
       npm run test --if-present
     displayName: 'npm install, build and test'
 
-test:
+- stage: Test
   # The steps that will be executed on build
   steps:
     - script:
@@ -36,7 +36,7 @@ test:
         code: |
           echo "node version $(node -v) running"
           echo "npm version $(npm -v) running"
--stage: Push
+- stage: Push
   steps:
     - internal/push:
         username: $OCIR_USERNAME
