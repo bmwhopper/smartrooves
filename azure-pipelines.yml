@@ -36,7 +36,7 @@ test:
         code: |
           echo "node version $(node -v) running"
           echo "npm version $(npm -v) running"
-push:
+-stage: Push
   steps:
     - internal/push:
         username: $OCIR_USERNAME
@@ -45,7 +45,7 @@ push:
         tag: smartrooves
         registry: https://$OCIR_REGISTRY/
 
-deploy:
+- stage: Deploy
   box: 
     id: node:latest
   steps:
@@ -67,4 +67,4 @@ deploy:
         server: $OKE_URL
         token: $OKE_TOKEN
         insecure-skip-tls-verify: true
-command: apply -f $WERCKER_ROOT/kubernetes_deployment.yml
+        startUpCommand: apply -f $WERCKER_ROOT/kubernetes_deployment.yml
