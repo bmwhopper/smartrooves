@@ -10,18 +10,18 @@ pool:
   vmImage: 'ubuntu-latest'
 
 
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '10.x'
+steps:
+  - task: NodeTool@0
+    inputs:
+     versionSpec: '10.x'
       displayName: 'Install Node.js'
 
-    - script: |
-        npm install
-        npm run build --if-present
-        npm run test --if-present
-      displayName: 'npm install, build and test'
-      
+  - script: |
+      npm install
+      npm run build --if-present
+      npm run test --if-present
+    displayName: 'npm install, build and test'
+
 test:
   # The steps that will be executed on build
   steps:
